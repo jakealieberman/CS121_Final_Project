@@ -58,10 +58,10 @@ class BlackjackGame {
     + void compareHands()
 }
 
-Deck "1" --> "*" Card
-Player "1" --> "1" Hand
-Dealer "1" --> "1" Hand
-BlackjackGame "1" --> "1" Deck
-BlackjackGame "1" --> "1" Player
-BlackjackGame "1" --> "1" Dealer
+Deck --> Card
+Player --> Hand
+Dealer --> Hand
+BlackjackGame --> Deck
+BlackjackGame --> Player
+BlackjackGame --> Dealer
 ```
