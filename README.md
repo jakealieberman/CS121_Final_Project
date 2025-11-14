@@ -2,6 +2,8 @@
 Final project in CS121 
 
 ```mermaid
+classDiagram
+
 class Card {
     - String rank
     - String suit
