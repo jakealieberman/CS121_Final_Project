@@ -108,9 +108,9 @@ BlackjackGame --> Dealer
      * if remaining == 0, optionally call api.reshuffle(deckId, true) or handle empty deck.
      * call api.drawCards(deckId, 1).
      * DeckAPI.drawCards(...)
-       * sends request to .../api/deck/{deckId}/draw/?count=1.
+       * sends request
          parses JSON, builds a Card object with
-         * code, rank (mapped from value), suit, imageUrl, and value (int for blackjack)
+         * code, rank 
          * returns a List<Card> (size 1) or directly a Card.
          * deck returns that Card.
     * deal 2 cards to the dealer
