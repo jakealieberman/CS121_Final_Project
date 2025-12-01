@@ -5,17 +5,15 @@ Final project in CS121
 classDiagram
 
 class Card {
-    - String code        // e.g. "6H"
-    - String rank        // e.g. "6", "J", "Q", "K", "A"
-    - String suit        // e.g. "HEARTS"
-    - int value          // blackjack value (2–11)
-    - String imageUrl    // optional: from API
-    + Card(String code, String rank, String suit, int value, String imageUrl)
+    - String code
+    - String rank
+    - String suit
+    - int value
+    + Card(String code, String rank, String suit, int value)
     + int getValue()
     + String getRank()
     + String getSuit()
     + String getCode()
-    + String getImageUrl()
     + String toString()
 }
 
