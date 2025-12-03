@@ -1,43 +1,45 @@
-// DeckAPI.java, interacts with the deck of cards api
+// deckapi: simple client for the deckofcardsapi
 
-import java.util.*; // used for List and ArrayList
-import java.net.*; // used for URL and HttpURLConnection
-import java.io.*; // used for InputStreamReader and BufferedReader
+import java.util.*;
+import java.net.*;
+import java.io.*;
 
-import com.google.gson.Gson; // used for JSON parsing
-import com.google.gson.GsonBuilder; // used for JSON parsing
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-public class DeckAPI { // interacts with the deck of cards api
+public class DeckAPI {
 
-    private String baseUrl;
-    private Gson gson;
+    private String baseUrl; // base url for api
+    private Gson gson; // gson instance for json parsing
+
     public DeckAPI() {
-        baseUrl = "https://deckofcardsapi.com/api/deck";
-        gson = new GsonBuilder().create();
+        baseUrl = "https://deckofcardsapi.com/api/deck"; // api endpoint
+        gson = new GsonBuilder().create(); // setup json parser
     }
 
-    private String callAPI(String urlString) { // helper method to call the api
-        StringBuilder response = new StringBuilder(); // stores the response
+    // call the api and return raw json string
+    private String callAPI(String urlString) {
+        StringBuilder response = new StringBuilder();
 
         try {
-            URL url = new URL(urlString); // create url object
+            URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-            conn.setRequestMethod("GET"); // set method to get
-            conn.setConnectTimeout(5000); // set timeouts so it doesnt hang
-            conn.setReadTimeout(5000); // set timeouts so it doesnt hang
+            conn.setRequestMethod("GET");
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(5000);
 
             BufferedReader in = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream())
+                new InputStreamReader(conn.getInputStream())
             );
 
-            String line; // read the response line by line
+            String line;
             while ((line = in.readLine()) != null) {
                 response.append(line);
             }
 
             in.close();
-        } catch (Exception e) { // catch any exceptions
+        } catch (Exception e) {
             System.out.println("Error calling API: " + e.getMessage());
             return null;
         }
@@ -45,77 +47,86 @@ public class DeckAPI { // interacts with the deck of cards api
         return response.toString();
     }
 
-    private static class NewDeckResponse { // response for new deck
-        boolean success; 
+    // response for new deck creation
+    private static class NewDeckResponse {
+        boolean success;
         String deck_id;
         int remaining;
         boolean shuffled;
     }
 
-    private static class DrawResponse { // response for drawing cards
+    // response when drawing cards
+    private static class DrawResponse {
         boolean success;
         String deck_id;
         CardJSON[] cards;
         int remaining;
     }
 
-    private static class CardJSON { // card representation in json
+    // structure for a single card in json
+    private static class CardJSON {
         String code;
         String image;
         String value;
         String suit;
     }
 
-    public String createShuffledDeck(int deckCount) { // creates a new shuffled deck
-        String url = baseUrl + "/new/shuffle/?deck_count=" + deckCount; // api url
+    // create a shuffled deck and return the deck id
+    public String createShuffledDeck(int deckCount) {
+        String url = baseUrl + "/new/shuffle/?deck_count=" + deckCount;
         String json = callAPI(url);
 
-        if (json == null) { // if api call failed
+        if (json == null) {
             return null;
         }
 
-        NewDeckResponse resp = gson.fromJson(json, NewDeckResponse.class); // parse json
+        NewDeckResponse resp = gson.fromJson(json, NewDeckResponse.class);
         return resp.deck_id;
     }
 
-    public List<Card> drawCards(String deckId, int count) { // draws cards from the deck
-        List<Card> result = new ArrayList<Card>(); // list to store drawn cards
+    // draw cards from a deck and convert to Card objects
+    public List<Card> drawCards(String deckId, int count) {
+        List<Card> result = new ArrayList<>();
 
-        String url = baseUrl + "/" + deckId + "/draw/?count=" + count; // api url
-        String json = callAPI(url); // call api
+        String url = baseUrl + "/" + deckId + "/draw/?count=" + count;
+        String json = callAPI(url);
 
-        if (json == null) { // if api call failed
+        if (json == null) {
             return result;
         }
 
-        DrawResponse resp = gson.fromJson(json, DrawResponse.class); // parse json
+        DrawResponse resp = gson.fromJson(json, DrawResponse.class);
 
-        if (resp.cards == null) { // if no cards were drawn
+        if (resp.cards == null) {
             return result;
         }
 
-        for (CardJSON cj : resp.cards) { // convert CardJSON to Card
-            int blackjackValue = convertRankToValue(cj.value); // convert to blackjack value
-            Card card = new Card(cj.code, cj.value, cj.suit, blackjackValue); // create Card object
+        for (CardJSON cj : resp.cards) {
+            int blackjackValue = convertRankToValue(cj.value);
+            Card card = new Card(cj.code, cj.value, cj.suit, blackjackValue);
             result.add(card);
         }
 
         return result;
     }
 
-    public void reshuffle(String deckId, boolean remainingOnly) { // reshuffles the deck
-        String url = baseUrl + "/" + deckId + "/shuffle/?remaining=" + remainingOnly; // api url
-        String json = callAPI(url); // call api
+    // reshuffle the deck, optionally only remaining cards
+    public void reshuffle(String deckId, boolean remainingOnly) {
+        String url = baseUrl + "/" + deckId + "/shuffle/?remaining=" + remainingOnly;
+        callAPI(url);
     }
-    
-    private int convertRankToValue(String rank) { // helper to convert rank to blackjack value
-        if (rank.equals("ACE")) { // ace is 11
+
+    // convert card rank string to blackjack numeric value
+    private int convertRankToValue(String rank) {
+        if (rank.equals("ACE")) {
             return 11;
         } else if (rank.equals("KING") || rank.equals("QUEEN") || rank.equals("JACK")) {
             return 10;
         } else {
             try {
-                return Integer.parseInt(rank); // numeric cards
+                return Integer.parseInt(rank);
+            } catch (NumberFormatException e) {
+                return 0;
             }
         }
     }
