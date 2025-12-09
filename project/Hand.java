@@ -24,12 +24,10 @@ public class Hand { // a hand of cards
                 aceCount++; 
             }
         }
-
         while (total > 21 && aceCount > 0) { // adjust for aces if total is less than 21
             total -= 10; // count ace as 1 instead of 11
             aceCount--; // reduce ace count
         }
-
         return total;
     }
 
